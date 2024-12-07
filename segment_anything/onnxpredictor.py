@@ -1,8 +1,10 @@
 from segment_anything import SamPredictor
 import onnxruntime as ort
+# from wonnx import Session
 import torch
 import cv2
 from torch.nn import functional as F
+import logging
 
 class OnnxImageEncoder():
     def __init__(self, file_path: str) -> None:
@@ -38,6 +40,7 @@ class SamOnnxModel():
         # print(f"pixel_mean: {self.pixel_mean}")
         # print(f"pixel_std: {self.pixel_std}")
         # print(x.device)
+        logging.info(f"device: {x.device}")
         pixel_mean = self.pixel_mean.to(x.device)
         pixel_std = self.pixel_std.to(x.device)
         # Normalize colors
@@ -58,10 +61,11 @@ class SamOnnxPredictor(SamPredictor):
 
 if __name__ == "__main__":
     import time
+    logging.basicConfig(level=logging.INFO)
     print("start processing")
     tstart = time.time()
     predictor = SamOnnxPredictor("/Users/desjajja/Projects/sam-app/models/vit_quantized.onnx")
-    image = cv2.imread('/Users/desjajja/Projects/sam-app/images/dog.webp')
+    image = cv2.imread('/Users/desjajja/Projects/sam-app/dog.jpg')
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     predictor.set_image(image)
     embedding = predictor.get_image_embedding()[0]
